@@ -1,8 +1,15 @@
 <script setup>
 import { ref } from 'vue'
 import * as XLSX from "xlsx";
+import { toast } from 'vue3-toastify';
 
 const fileInput = ref(null)
+const files = ref([
+  // {
+  //   name: 'test.xlsx',
+  //   size: '1MB',
+  // }
+])
 
 
 // a 檔案規則：第一行第一列為 "isTrue"
@@ -35,7 +42,7 @@ const handleFileChange = (e) => {
   // 從檔案名稱中決定驗證規則，若無對應規則則提示
   const rule = selectRule(file)
   if (!rule) {
-    alert('無對應規則，請確認檔名是否符合格式')
+    toast.error('無對應規則，請確認檔名是否符合格式')
     return
   }
 
@@ -52,9 +59,11 @@ const handleFileChange = (e) => {
     // 驗證規則
     const isValid = rule(worksheet)
     if (isValid) {
-      console.log("格式正確");
+      const { name, size } = file
+      files.value.push({ name, size })
+      toast.success('驗證成功，點擊確認按鈕上傳');
     } else {
-      console.log("格式錯誤");
+      toast.error('檔案格式錯誤');
     }
   };
 
@@ -64,9 +73,8 @@ const handleFileChange = (e) => {
 
 // 拖放
 const handleDrop = (e) => {
-  e.preventDefault();
   if (e.dataTransfer.files.length > 1) {
-    console.log("一次只能上傳單一文件");
+    toast.error("一次只能上傳單一文件");
     return;
   }
   const file = e.dataTransfer.files[0];
@@ -78,14 +86,14 @@ const handleDrop = (e) => {
     "application/vnd.ms-excel"
   ];
   if (!validTypes.includes(file.type)) {
-    console.log("檔案類型不正確，請上傳 Excel 檔案");
+    toast.error("檔案類型不正確，請上傳 Excel 檔案");
     return;
   }
 
   // 從檔案名稱中決定驗證規則，若無對應規則則提示
   const rule = selectRule(file)
   if (!rule) {
-    alert('無對應規則，請確認檔名是否符合格式')
+    toast.error('無對應規則，請確認檔名是否符合格式')
     return
   }
 
@@ -102,9 +110,11 @@ const handleDrop = (e) => {
     // 驗證規則
     const isValid = rule(worksheet)
     if (isValid) {
-      console.log("格式正確");
+      const { name, size } = file
+      files.value.push({ name, size })
+      toast.success('驗證成功，點擊確認按鈕上傳');
     } else {
-      console.log("格式錯誤");
+      toast.error('檔案格式錯誤');
     }
   };
 
@@ -114,12 +124,19 @@ const handleDrop = (e) => {
 
 <template>
   <!-- file type 的 input 在不同瀏覽器下樣式不一致，故透過 button 觸發 -->
-  <button type="button" class="text-white text-lg bg-blue-500 py-2 px-4 rounded-lg mb-10"
-    @click="openFileInput">點擊按鈕上傳</button>
+  <button type="button" class="text-white text-lg bg-blue-500 py-2 px-4 rounded-lg mb-6"
+    @click="openFileInput">上傳文件</button>
   <input type="file" ref="fileInput" accept=".xls,.xlsx" class="hidden" @change="handleFileChange" />
-  <div @dragover.prevent @drop="handleDrop"
-    class="w-[600px] h-[350px] mx-auto border-4 border-dotted border-blue-500 rounded-lg flex justify-center items-center text-3xl">
+  <div @dragover.prevent @drop.prevent="handleDrop"
+    class="w-[600px] h-[350px] mx-auto border-4 border-dotted border-blue-500 rounded-lg flex justify-center items-center text-3xl mb-10">
     將單一文件拖曳到範圍內上傳</div>
+
+  <h2 class="text-2xl mb-6">驗證成功文件</h2>
+  <ul class="mb-10">
+    <li v-for="file in files">Name: {{ file.name }}, size: {{ file.size }}</li>
+  </ul>
+
+  <button class="text-white text-lg bg-blue-500 py-2 px-4 rounded-lg">確認</button>
 </template>
 
 <style scoped></style>
