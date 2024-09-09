@@ -9,8 +9,8 @@ const test = ref('test')
 </script>
 
 <template>
-  <div class="text-center mt-24">
-    <h1 class="text-4xl mb-12">測試用上傳頁</h1>
+  <div class="text-center">
+    <h1 class="text-4xl pt-24 mb-12 text-white">測試用上傳頁</h1>
     <Upload />
   </div>
 </template>

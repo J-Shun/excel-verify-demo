@@ -2,26 +2,15 @@
 import { ref } from 'vue'
 import * as XLSX from "xlsx";
 import { toast } from 'vue3-toastify';
+import { verifyGNIReportData } from '../../helper/verify'
 
 const fileInput = ref(null)
-const files = ref([
-  // {
-  //   name: 'test.xlsx',
-  //   size: '1MB',
-  // }
-])
-
-
-// a 檔案規則：第一行第一列為 "isTrue"
-const verifyRuleA = (worksheet) => {
-  const firstCell = worksheet['A1']?.v
-  return firstCell === "isTrue"
-}
+const files = ref([])
 
 const nameMapping = {
-  'a': verifyRuleA,
-  'b': 'b',
-  'c': 'c',
+  'a': 'a',
+  'b': verifyGNIReportData, // 全對
+  'c': verifyGNIReportData, // 欄位名稱錯誤
 }
 
 const openFileInput = () => {
@@ -56,15 +45,8 @@ const handleFileChange = (e) => {
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
 
-    // 驗證規則
-    const isValid = rule(worksheet)
-    if (isValid) {
-      const { name, size } = file
-      files.value.push({ name, size })
-      toast.success('驗證成功，點擊確認按鈕上傳');
-    } else {
-      toast.error('檔案格式錯誤');
-    }
+    const result = rule(worksheet)
+    console.log(result);
   };
 
   reader.readAsArrayBuffer(file);
@@ -106,16 +88,8 @@ const handleDrop = (e) => {
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
 
-
-    // 驗證規則
-    const isValid = rule(worksheet)
-    if (isValid) {
-      const { name, size } = file
-      files.value.push({ name, size })
-      toast.success('驗證成功，點擊確認按鈕上傳');
-    } else {
-      toast.error('檔案格式錯誤');
-    }
+    const result = rule(worksheet)
+    console.log(result);
   };
 
   reader.readAsArrayBuffer(file);
@@ -123,12 +97,24 @@ const handleDrop = (e) => {
 </script>
 
 <template>
-  <!-- file type 的 input 在不同瀏覽器下樣式不一致，故透過 button 觸發 -->
-  <button type="button" class="text-white text-lg bg-blue-500 py-2 px-4 rounded-lg mb-6"
-    @click="openFileInput">上傳文件</button>
-  <input type="file" ref="fileInput" accept=".xls,.xlsx" class="hidden" @change="handleFileChange" />
+  <div class="flex justify-center items-center mb-6 gap-5">
+    <select name="" id="" class="py-1 bg-black text-white text-center border-2 rounded-lg border-[#595959]">
+      <option value="" selected disabled hidden>上傳資料大類</option>
+    </select>
+
+
+    <select name="" id="" class="py-1 bg-black text-white text-center border-2 rounded-lg border-[#595959]">
+      <option value="" selected disabled hidden>上傳資料細類</option>
+    </select>
+
+    <!-- file type 的 input 在不同瀏覽器下樣式不一致，故透過 button 觸發 -->
+    <button type="button" class="text-white text-md bg-black py-1 px-2 border-[#595959] border-2 rounded-md"
+      @click="openFileInput">選擇檔案</button>
+    <input type="file" ref="fileInput" accept=".xls,.xlsx" class="hidden" @change="handleFileChange" />
+  </div>
+
   <div @dragover.prevent @drop.prevent="handleDrop"
-    class="w-[600px] h-[350px] mx-auto border-4 border-dotted border-blue-500 rounded-lg flex justify-center items-center text-3xl mb-10">
+    class="w-[600px] h-[350px] mx-auto border-4 border-dotted text-white border-blue-500 rounded-lg flex justify-center items-center text-3xl mb-10">
     將單一文件拖曳到範圍內上傳</div>
 
   <h2 class="text-2xl mb-6">驗證成功文件</h2>
