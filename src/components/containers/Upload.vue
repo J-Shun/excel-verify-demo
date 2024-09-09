@@ -68,7 +68,7 @@ const handleDrop = (e) => {
     "application/vnd.ms-excel"
   ];
   if (!validTypes.includes(file.type)) {
-    toast.error("檔案類型不正確，請上傳 Excel 檔案");
+    toast.error("檔案格式不符，請確認檔案格式是否為「.xlsx」");
     return;
   }
 
